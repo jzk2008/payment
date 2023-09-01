@@ -64,14 +64,16 @@ class AliNotify extends NotifyStrategy
     {
         if (isset($data['is_sync']) && $data['is_sync'] === 'true') {
             $data['trade_status'] = 'TRADE_SUCCESS';
-            unset($data['is_sync']);
         }
         $status = $this->getTradeStatus($data['trade_status']);
         if ($status !== Config::TRADE_STATUS_SUCC) {
             // 如果不是交易成功状态，直接返回错误，
             return false;
         }
-
+        if (isset($data['is_sync']) && $data['is_sync'] === 'true') {
+            unset($data['trade_status']);
+            unset($data['is_sync']);
+        }
         // 检查签名
         $flag = $this->verifySign($data);
 
@@ -90,35 +92,47 @@ class AliNotify extends NotifyStrategy
             $data['channel'] = Config::ALI_CHARGE;
             return $data;
         }
-
-        $retData = [
-            'notify_time'   => ArrayUtil::get($data, 'notify_time'),
-            'notify_type' => ArrayUtil::get($data, 'notify_type'),
-            'notify_id' => ArrayUtil::get($data, 'notify_id'),
-            'app_id' => ArrayUtil::get($data, 'app_id'),
-            'transaction_id'   => ArrayUtil::get($data, 'trade_no'),
-            'order_no'   => ArrayUtil::get($data, 'out_trade_no'),
-            'out_biz_no' => ArrayUtil::get($data, 'out_biz_no'),
-            'buyer_id'   => ArrayUtil::get($data, 'buyer_id'),
-            'buyer_account' => ArrayUtil::get($data, 'buyer_logon_id'),
-            'seller_id' => ArrayUtil::get($data, 'seller_id'),
-            'seller_email' => ArrayUtil::get($data, 'seller_email'),
-            'trade_state'   => $this->getTradeStatus($data['trade_status']),
-            'amount'   => ArrayUtil::get($data, 'total_amount'),
-            'receipt_amount' => ArrayUtil::get($data, 'receipt_amount'),// 商家在交易中实际收到的款项，单位为元
-            'invoice_amount' => ArrayUtil::get($data, 'invoice_amount'),// 用户在交易中支付的可开发票的金额
-            'pay_amount' => ArrayUtil::get($data, 'buyer_pay_amount'),// 用户在交易中支付的金额
-            'point_amount' => ArrayUtil::get($data, 'point_amount'),// 使用集分宝支付的金额
-            'refund_fee' => ArrayUtil::get($data, 'refund_fee'), // 总退款金额
-            'subject'   => ArrayUtil::get($data, 'subject'),
-            'body'   => ArrayUtil::get($data, 'body'),
-            'trade_create_time' => ArrayUtil::get($data, 'gmt_create'),// 交易创建时间
-            'pay_time'   => ArrayUtil::get($data, 'gmt_payment'),// 交易付款时间
-            'trade_refund_time' => ArrayUtil::get($data, 'gmt_refund'), // 交易退款时间
-            'trade_close_time' => ArrayUtil::get($data, 'gmt_close'), // 交易关闭时间
-            'channel'   => Config::ALI_CHARGE,
-        ];
-
+        if (isset($data['is_sync']) && $data['is_sync'] === 'true') {
+            $retData = [
+                'charset'   => ArrayUtil::get($data, 'charset'),
+                'method' => ArrayUtil::get($data, 'method'),
+                'app_id' => ArrayUtil::get($data, 'app_id'),
+                'transaction_id'   => ArrayUtil::get($data, 'trade_no'),
+                'order_no'   => ArrayUtil::get($data, 'out_trade_no'),
+                'seller_id' => ArrayUtil::get($data, 'seller_id'),
+                'trade_state'   => $this->getTradeStatus('TRADE_SUCCESS'),
+                'amount'   => ArrayUtil::get($data, 'total_amount'),
+                'channel'   => Config::ALI_CHARGE,
+            ];
+        }else {
+            $retData = [
+                'notify_time' => ArrayUtil::get($data, 'notify_time'),
+                'notify_type' => ArrayUtil::get($data, 'notify_type'),
+                'notify_id' => ArrayUtil::get($data, 'notify_id'),
+                'app_id' => ArrayUtil::get($data, 'app_id'),
+                'transaction_id' => ArrayUtil::get($data, 'trade_no'),
+                'order_no' => ArrayUtil::get($data, 'out_trade_no'),
+                'out_biz_no' => ArrayUtil::get($data, 'out_biz_no'),
+                'buyer_id' => ArrayUtil::get($data, 'buyer_id'),
+                'buyer_account' => ArrayUtil::get($data, 'buyer_logon_id'),
+                'seller_id' => ArrayUtil::get($data, 'seller_id'),
+                'seller_email' => ArrayUtil::get($data, 'seller_email'),
+                'trade_state' => $this->getTradeStatus($data['trade_status']),
+                'amount' => ArrayUtil::get($data, 'total_amount'),
+                'receipt_amount' => ArrayUtil::get($data, 'receipt_amount'),// 商家在交易中实际收到的款项，单位为元
+                'invoice_amount' => ArrayUtil::get($data, 'invoice_amount'),// 用户在交易中支付的可开发票的金额
+                'pay_amount' => ArrayUtil::get($data, 'buyer_pay_amount'),// 用户在交易中支付的金额
+                'point_amount' => ArrayUtil::get($data, 'point_amount'),// 使用集分宝支付的金额
+                'refund_fee' => ArrayUtil::get($data, 'refund_fee'), // 总退款金额
+                'subject' => ArrayUtil::get($data, 'subject'),
+                'body' => ArrayUtil::get($data, 'body'),
+                'trade_create_time' => ArrayUtil::get($data, 'gmt_create'),// 交易创建时间
+                'pay_time' => ArrayUtil::get($data, 'gmt_payment'),// 交易付款时间
+                'trade_refund_time' => ArrayUtil::get($data, 'gmt_refund'), // 交易退款时间
+                'trade_close_time' => ArrayUtil::get($data, 'gmt_close'), // 交易关闭时间
+                'channel' => Config::ALI_CHARGE,
+            ];
+        }
         // 检查是否存在用户自定义参数
         if (isset($data['passback_params']) && ! empty($data['passback_params'])) {
             $retData['return_param'] = $data['passback_params'];
