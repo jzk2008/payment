@@ -63,7 +63,7 @@ class AliNotify extends NotifyStrategy
     public function checkNotifyData(array $data)
     {
         if (isset($data['is_sync']) && $data['is_sync'] === 'true') {
-            $data['trade_status'] = 'success';
+            $data['trade_status'] = 'TRADE_SUCCESS';
             unset($data['is_sync']);
         }
         $status = $this->getTradeStatus($data['trade_status']);
