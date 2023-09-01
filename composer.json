@@ -1,0 +1,24 @@
+{
+    "name": "seetolight/payment",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "seetolight",
+            "email": "552039447@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6",
+        "ext-bcmath": "*",
+        "ext-mbstring": "*",
+        "guzzlehttp/guzzle": "~6.0"
+    },
+    "require-dev": {
+        "endroid/qrcode": "~1.9",
+        "codeception/codeception": "*"
+    },
+    "autoload": {
+        "psr-4": {"Payment\\": "src/"}
+    }
+}
